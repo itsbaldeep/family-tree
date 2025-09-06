@@ -1,0 +1,276 @@
+[
+  {
+    "id": "p1",
+    "name": "Avatar Singh",
+    "gender": "male",
+    "dob": {
+      "year": 1960,
+      "month": 5,
+      "day": 10
+    },
+    "birthPlace": "New York",
+    "deathDate": {
+      "year": 1980,
+      "month": 10,
+      "day": 1
+    },
+    "deathPlace": null,
+    "phone": "111-111-1111"
+  },
+  {
+    "id": "p2",
+    "name": "Satwant Kaur",
+    "gender": "female",
+    "dob": {
+      "year": 1962,
+      "month": 8,
+      "day": 3
+    },
+    "birthPlace": "Boston",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "222-222-2222"
+  },
+  {
+    "id": "p3",
+    "name": "Robert Doe",
+    "gender": "male",
+    "dob": {
+      "year": 1964,
+      "month": 7,
+      "day": 14
+    },
+    "birthPlace": "Chicago",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "333-333-3333"
+  },
+  {
+    "id": "p4",
+    "name": "Emily Brown",
+    "gender": "female",
+    "dob": {
+      "year": 1966
+    },
+    "birthPlace": "Houston",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "444-444-4444"
+  },
+  {
+    "id": "p5",
+    "name": "Michael Doe",
+    "gender": "male",
+    "dob": {
+      "year": 1968
+    },
+    "birthPlace": "San Francisco",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "555-555-5555"
+  },
+  {
+    "id": "p6",
+    "name": "Sarah Wilson",
+    "gender": "female",
+    "dob": {
+      "year": 1970,
+      "month": 2
+    },
+    "birthPlace": "Los Angeles",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "666-666-6666"
+  },
+  {
+    "id": "p7",
+    "name": "David Doe",
+    "gender": "male",
+    "dob": {
+      "year": 1972,
+      "month": 9
+    },
+    "birthPlace": "Seattle",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "777-777-7777"
+  },
+  {
+    "id": "p8",
+    "name": "Laura Martinez",
+    "gender": "female",
+    "dob": {
+      "year": 1974
+    },
+    "birthPlace": "Miami",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "888-888-8888"
+  },
+  {
+    "id": "p9",
+    "name": "William Doe",
+    "gender": "male",
+    "dob": {
+      "year": 1976
+    },
+    "birthPlace": "Denver",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "999-999-9999"
+  },
+  {
+    "id": "p10",
+    "name": "Olivia Taylor",
+    "gender": "female",
+    "dob": {
+      "year": 1978
+    },
+    "birthPlace": "Austin",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "101-101-1010"
+  },
+  {
+    "id": "p11",
+    "name": "Alice Doe",
+    "gender": "female",
+    "dob": {
+      "year": 1985,
+      "month": 1
+    },
+    "birthPlace": "New York",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "202-202-2020"
+  },
+  {
+    "id": "p12",
+    "name": "Bob Doe",
+    "gender": "male",
+    "dob": {
+      "year": 1987
+    },
+    "birthPlace": "New York",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "303-303-3030"
+  },
+  {
+    "id": "p13",
+    "name": "Catherine Doe",
+    "gender": "female",
+    "dob": {
+      "year": 1989,
+      "approximate": true,
+      "notes": "Estimated mid-1989"
+    },
+    "birthPlace": "Chicago",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "404-404-4040"
+  },
+  {
+    "id": "p14",
+    "name": "Daniel Doe",
+    "gender": "male",
+    "dob": {
+      "year": 1991,
+      "month": 12
+    },
+    "birthPlace": "Chicago",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "505-505-5050"
+  },
+  {
+    "id": "p15",
+    "name": "Ella Doe",
+    "gender": "female",
+    "dob": {
+      "year": 1993,
+      "month": 6,
+      "day": 22
+    },
+    "birthPlace": "San Francisco",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "606-606-6060"
+  },
+  {
+    "id": "p16",
+    "name": "Frank Doe",
+    "gender": "male",
+    "dob": {
+      "year": 1995,
+      "range": {
+        "from": "1995",
+        "to": "1996"
+      },
+      "notes": "Conflicting records"
+    },
+    "birthPlace": "San Francisco",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "707-707-7070"
+  },
+  {
+    "id": "p17",
+    "name": "Grace Doe",
+    "gender": "female",
+    "dob": {
+      "year": 1997
+    },
+    "birthPlace": "Seattle",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "808-808-8080"
+  },
+  {
+    "id": "p18",
+    "name": "Henry Doe",
+    "gender": "male",
+    "dob": {
+      "year": 1999,
+      "month": 5
+    },
+    "birthPlace": "Seattle",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "909-909-9090"
+  },
+  {
+    "id": "p19",
+    "name": "Isabella Doe",
+    "gender": "female",
+    "dob": {
+      "year": 2001
+    },
+    "birthPlace": "Denver",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "111-222-3333"
+  },
+  {
+    "id": "p20",
+    "name": "Jack Doe",
+    "gender": "male",
+    "dob": {
+      "year": 2003
+    },
+    "birthPlace": "Denver",
+    "deathDate": null,
+    "deathPlace": null,
+    "phone": "444-555-6666"
+  },
+  {
+    "id": "p21",
+    "name": "Bobice Doe",
+    "gender": "male",
+    "dob": {
+      "year": 2020,
+      "month": 10,
+      "day": 28
+    }
+  }
+]

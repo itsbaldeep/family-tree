@@ -1,0 +1,99 @@
+[
+  {
+    "id": "m1",
+    "spouses": [
+      "p1",
+      "p2"
+    ],
+    "date": {
+      "year": 1980,
+      "month": 6,
+      "day": 15
+    },
+    "place": "New York",
+    "status": "married",
+    "children": [
+      "p11",
+      "p12"
+    ]
+  },
+  {
+    "id": "m2",
+    "spouses": [
+      "p3",
+      "p4"
+    ],
+    "date": {
+      "year": 1982
+    },
+    "place": "Chicago",
+    "status": "married",
+    "children": [
+      "p13",
+      "p14"
+    ]
+  },
+  {
+    "id": "m3",
+    "spouses": [
+      "p5",
+      "p6"
+    ],
+    "date": {
+      "year": 1984
+    },
+    "place": "San Francisco",
+    "status": "married",
+    "children": [
+      "p15",
+      "p16"
+    ]
+  },
+  {
+    "id": "m4",
+    "spouses": [
+      "p7",
+      "p8"
+    ],
+    "date": {
+      "year": 1986
+    },
+    "place": "Seattle",
+    "status": "married",
+    "children": [
+      "p17",
+      "p18"
+    ]
+  },
+  {
+    "id": "m5",
+    "spouses": [
+      "p9",
+      "p10"
+    ],
+    "date": {
+      "year": 1988
+    },
+    "place": "Denver",
+    "status": "married",
+    "children": [
+      "p19",
+      "p20"
+    ]
+  },
+  {
+    "id": "m6",
+    "spouses": [
+      "p11",
+      "p12"
+    ],
+    "date": {
+      "year": 2019,
+      "month": 10,
+      "day": 28
+    },
+    "children": [
+      "p21"
+    ]
+  }
+]
