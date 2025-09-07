@@ -3,24 +3,11 @@
 import PartialDateInput from '@/components/PartialDateInput'
 import { Marriage, Person } from '@/data/familyTree'
 import { IMarriage, IPerson } from '@/lib/models'
+import { formatPartialDate } from '@/lib/utils'
 import { Dialog, Transition } from '@headlessui/react'
 import Link from 'next/link'
 import { Fragment, useEffect, useState } from 'react'
 
-// Helper function to format partial dates for display
-function formatPartialDate(d?: { year?: number; month?: number; day?: number; approximate?: boolean; range?: { from?: string; to?: string }; notes?: string }) {
-  if (!d) return ''
-  if (d.range?.from || d.range?.to) {
-    const from = d.range?.from ?? '?'
-    const to = d.range?.to ?? '?'
-    return `${from}–${to}${d.approximate ? ' (approx)' : ''}`
-  }
-  const { year, month, day } = d
-  if (year && month && day) return `${day}/${month}/${year}${d.approximate ? ' (approx)' : ''}`
-  if (month && year) return `${month}/${year}${d.approximate ? ' (approx)' : ''}`
-  if (year) return `${year}${d.approximate ? ' (approx)' : ''}`
-  return d.notes ?? ''
-}
 
 // Helper function to get person name by ID
 function getPersonName(persons: IPerson[], id: string): string {

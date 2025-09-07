@@ -10,7 +10,22 @@ export async function GET() {
   try {
     await connectToDatabase();
     
-    const persons = await Person.find({}).sort({ createdAt: -1 }).lean();
+    const persons = await Person.aggregate([
+    {
+      $addFields: {
+        effectiveDob: {
+          $dateFromParts: {
+            year: "$dob.year",
+            month: { $ifNull: ["$dob.month", 1] },
+            day: { $ifNull: ["$dob.day", 1] }
+          }
+        }
+      }
+    },
+    {
+      $sort: { effectiveDob: 1 } // oldest → youngest
+    }
+  ]);
     
     console.log(`✅ Retrieved ${persons.length} persons`);
     return NextResponse.json(persons);

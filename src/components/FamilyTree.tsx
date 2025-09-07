@@ -1,41 +1,28 @@
 "use client"
 
 import { IMarriage, IPerson } from "@/lib/models";
+import { calculateAge, formatLifeSpan, formatPartialDate } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background, Edge, Node } from "react-flow-renderer";
 
-/** ---------- Helpers & types ---------- **/
 type Position = { x: number; y: number }
 
-function formatPartialDate(d?: {
-    year?: number
-    month?: number
-    day?: number
-    approximate?: boolean
-    range?: { from?: string; to?: string }
-    notes?: string
-}) {
-    if (!d) return ""
-    if (d.range?.from || d.range?.to) {
-        const from = d.range?.from ?? "?"
-        const to = d.range?.to ?? "?"
-        return `~${from}–${to}${d.approximate ? " (approx)" : ""}`
-    }
-    const { year, month, day } = d
-    if (year && month && day) return `${day}/${month}/${year}${d.approximate ? " (approx)" : ""}`
-    if (month && year) return `${month}/${year}${d.approximate ? " (approx)" : ""}`
-    if (year) return `${year}${d.approximate ? " (approx)" : ""}`
-    return d.notes ?? ""
+const COLORS = {
+    male: "#95cdf5",
+    female: "#f8a8ec",
+    other: "#c7d2fe",
+    marriage: "#f9f789",
+    text: "#222222",
+    edge: "#333333"
 }
 
-/** ---------- Layout & rendering component (refactored) ---------- **/
 export default function FamilyTree() {
     const [persons, setPersons] = useState<IPerson[]>([])
     const [marriages, setMarriages] = useState<IMarriage[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    // Load data from API
+    // Load data
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -44,10 +31,7 @@ export default function FamilyTree() {
                     fetch('/api/persons'),
                     fetch('/api/marriages')
                 ])
-
-                if (!personsRes.ok || !marriagesRes.ok) {
-                    throw new Error('Failed to load family data')
-                }
+                if (!personsRes.ok || !marriagesRes.ok) throw new Error('Failed to load family data')
 
                 const [personsData, marriagesData] = await Promise.all([
                     personsRes.json(),
@@ -62,16 +46,14 @@ export default function FamilyTree() {
                 setLoading(false)
             }
         }
-
         loadData()
     }, [])
 
     const { nodes, edges } = useMemo(() => {
         const nodes: Node[] = []
         const edges: Edge[] = []
-
-        // quick maps
         const marriageMap = Object.fromEntries(marriages.map((m) => [m._id, m]))
+
         const spouseToMarriageIds = new Map<string, string[]>()
         marriages.forEach((m) => {
             m.spouses.forEach((s) => {
@@ -79,37 +61,36 @@ export default function FamilyTree() {
             })
         })
 
-        // detect root marriages (marriages whose spouses are NOT children of any other marriage)
+        // detect roots
         const marriageHasParent = new Map<string, boolean>()
         marriages.forEach((m) => marriageHasParent.set(m._id, false))
         marriages.forEach((m) => {
             m.children?.forEach((childId) => {
-                // any marriage where childId is a spouse is considered a child marriage; mark those marriages as having a parent
                 const childMarriageIds = spouseToMarriageIds.get(childId) ?? []
                 childMarriageIds.forEach((mid) => marriageHasParent.set(mid, true))
             })
         })
         const rootMarriages = marriages.filter((m) => !marriageHasParent.get(m._id))
 
-        // positions container
         const nodePositions: Record<string, Position> = {}
-
-        // spacing tuning (tweak these to taste)
-        const hSpacing = 150 // horizontal unit between leaf nodes
-        const vSpacing = 150 // vertical spacing between levels
-        const spouseGap = 60 // horizontal gap between spouses
-
-        // prevent infinite loops on cycles from second marriages
+        const hSpacing = 160
+        const vSpacing = 80
         const visitedMarriages = new Set<string>()
 
-        // Recursive layout:
-        // returns { centerX, nextX } where nextX is the next available x after this subtree
+        function dobToDate(p?: IPerson) {
+            if (!p?.dob?.year) return null
+            return new Date(p.dob.year, (p.dob.month ?? 1) - 1, p.dob.day ?? 1)
+        }
+
+        // Format spouse label with gender color + birth/death
+        const formatSpouseLabel = (p: IPerson) => {
+            const lifespan = formatLifeSpan(p.dob, p.deathDate)
+            return `${p.name} (${calculateAge(p.dob, p.deathDate)})\n${lifespan}\n`
+        }
+
         function layoutMarriage(marriageId: string, depth: number, xOffset: number): { centerX: number; nextX: number } {
             if (!marriageMap[marriageId]) return { centerX: xOffset, nextX: xOffset + hSpacing }
-            if (visitedMarriages.has(marriageId)) {
-                // already placed elsewhere (second marriage) — reserve minimal width to avoid overlap
-                return { centerX: xOffset, nextX: xOffset + hSpacing }
-            }
+            if (visitedMarriages.has(marriageId)) return { centerX: xOffset, nextX: xOffset + hSpacing }
 
             visitedMarriages.add(marriageId)
             const m = marriageMap[marriageId]
@@ -117,25 +98,32 @@ export default function FamilyTree() {
             let currentX = xOffset
             const childCenters: number[] = []
 
-            // layout each child: if child has its own marriage, recursively layout that marriage as a subtree
-            m.children?.forEach((cid: string) => {
-                const childMarriageIds = spouseToMarriageIds.get(cid) ?? []
-                // prefer an unvisited child marriage (if multiple), otherwise treat as leaf
-                const childMarriageId = childMarriageIds.find((mid) => !visitedMarriages.has(mid))
+            // sort children by DOB
+            const sortedChildren = [...(m.children ?? [])].sort((a, b) => {
+                const pa = persons.find(p => p._id === a)
+                const pb = persons.find(p => p._id === b)
+                const da = dobToDate(pa)
+                const db = dobToDate(pb)
+                if (!da && !db) return 0
+                if (!da) return 1
+                if (!db) return -1
+                return da.getTime() - db.getTime()
+            })
 
+            sortedChildren.forEach((cid) => {
+                const childMarriageIds = spouseToMarriageIds.get(cid) ?? []
+                const childMarriageId = childMarriageIds.find((mid) => !visitedMarriages.has(mid))
                 if (childMarriageId) {
                     const { centerX: childCenter, nextX } = layoutMarriage(childMarriageId, depth + 2, currentX)
                     childCenters.push(childCenter)
                     currentX = nextX
                 } else {
-                    // leaf child (no deeper marriage), place as a simple node
                     nodePositions[cid] = { x: currentX, y: (depth + 1) * vSpacing }
                     childCenters.push(currentX)
                     currentX += hSpacing
                 }
             })
 
-            // if no children, we will place the marriage at currentX (so spouses and marriage occupy the next chunk)
             let centerX = currentX
             if (childCenters.length > 0) {
                 const minX = Math.min(...childCenters)
@@ -143,67 +131,122 @@ export default function FamilyTree() {
                 centerX = (minX + maxX) / 2
             }
 
-            // marriage node position
-            nodePositions[`marriage-${m._id}`] = { x: centerX, y: depth * vSpacing }
+            // spouse merged node
+            const spouses = m.spouses
+                .map(id => persons.find(p => p._id === id))
+                .filter((p): p is IPerson => !!p)
 
-            // spouses positioned side-by-side above marriage node
-            const [s1, s2] = m.spouses
-            nodePositions[s1] = { x: centerX - spouseGap, y: (depth - 1) * vSpacing }
-            nodePositions[s2] = { x: centerX + spouseGap, y: (depth - 1) * vSpacing }
+            const spouseNodeId = `spouses-${m._id}`
+            nodePositions[spouseNodeId] = { x: centerX, y: (depth - 1) * vSpacing }
 
-            // compute nextX to ensure next sibling subtree starts to the right and avoids overlap
-            const nextX = Math.max(currentX, centerX + spouseGap + hSpacing / 2)
+            // Decide bloodline color (pick first spouse)
+            const bloodSpouse = spouses[0]
+            const baseColor =
+                bloodSpouse?.gender === "male"
+                    ? COLORS.male
+                    : bloodSpouse?.gender === "female"
+                        ? COLORS.female
+                        : COLORS.other
+
+            const lines = spouses.map(formatSpouseLabel).join("")
+
+            nodes.push({
+                id: spouseNodeId,
+                data: { label: lines },
+                position: nodePositions[spouseNodeId],
+                style: {
+                    border: "2px solid #333",
+                    whiteSpace: "pre-line",
+                    background: baseColor,
+                    minWidth: 110,
+                    textAlign: "center",
+                    borderRadius: 10,
+                    padding: 8,
+                    fontSize: 9,
+                    color: COLORS.text,
+                    fontWeight: 600,
+                },
+            })
+
+            // marriage node itself
+            const marriageNodeId = `marriage-${m._id}`
+            nodePositions[marriageNodeId] = { x: centerX, y: depth * vSpacing + 5 }
+            const dateStr = formatPartialDate(m.date)
+            const label = [`💍 ${dateStr || ""} (${calculateAge(m.date, {})})`].filter(Boolean).join("\n")
+
+            nodes.push({
+                id: marriageNodeId,
+                data: { label },
+                position: nodePositions[marriageNodeId],
+                style: {
+                    borderRadius: 8,
+                    border: "2px solid rgba(0,0,0,0.7)",
+                    background: COLORS.marriage,
+                    color: COLORS.text,
+                    textAlign: "center",
+                    whiteSpace: "pre-line",
+                    padding: 6,
+                    fontSize: 9,
+                    fontWeight: 600,
+                },
+            })
+
+            // connect spouse node to marriage node
+            edges.push({
+                id: `${spouseNodeId}-${marriageNodeId}`,
+                source: spouseNodeId,
+                target: marriageNodeId,
+                animated: false,
+                style: { stroke: COLORS.edge, strokeWidth: 1.25 },
+            })
+
+            // edges: marriage -> children
+            m.children?.forEach((cid) => {
+                const childMarriageIds = spouseToMarriageIds.get(cid) ?? []
+                const childMarriageId = childMarriageIds.find(mid => marriageMap[mid])
+                const targetNodeId = childMarriageId ? `spouses-${childMarriageId}` : cid
+                edges.push({
+                    id: `${marriageNodeId}-${targetNodeId}`,
+                    source: marriageNodeId,
+                    target: targetNodeId,
+                    animated: true,
+                    style: { stroke: COLORS.edge, strokeWidth: 1.25 },
+                })
+            })
+
+            const nextX = Math.max(currentX, centerX + hSpacing)
             return { centerX, nextX }
         }
 
-        // Layout all root marriages left-to-right
+        // layout roots
         let globalX = 0
         rootMarriages.forEach((rm) => {
             const { nextX } = layoutMarriage(rm._id, 1, globalX)
-            globalX = nextX + hSpacing // small gutter between root subtrees
+            globalX = nextX + hSpacing
         })
 
-        // After recursive pass, some persons might still not have positions (edge cases); place them in a fallback row
-        // compute current extents
-        const assignedXs = Object.values(nodePositions).map((p) => p.x)
-        const maxAssignedX = assignedXs.length ? Math.max(...assignedXs) : 0
-        let fallbackX = maxAssignedX + hSpacing
-
+        // Build standalone person nodes
         persons.forEach((p) => {
-            if (!nodePositions[p._id]) {
-                // place them on top row (y = 0) after existing graph
-                nodePositions[p._id] = { x: fallbackX, y: 0 }
-                fallbackX += hSpacing
-            }
-        })
-
-        // Build person nodes
-        persons.forEach((p) => {
+            const isSpouse = marriages.some(m => m.spouses.includes(p._id))
+            if (isSpouse) return
             const pos = nodePositions[p._id] ?? { x: 0, y: 0 }
-            const dobStr = formatPartialDate(p.dob)
-            const deathStr = formatPartialDate(p.deathDate)
             const lines = [
-                p.name,
-                dobStr ? `b. ${dobStr}` : undefined,
-                p.birthPlace ? `${p.birthPlace}` : undefined,
-                deathStr ? `d. ${deathStr}${p.deathPlace ? ` • ${p.deathPlace}` : ""}` : undefined,
-                p.phone ? `☎ ${p.phone}` : undefined,
-            ]
-                .filter(Boolean)
-                .join("\n")
+                `${p.name} (${calculateAge(p.dob, p.deathDate)})`,
+                formatLifeSpan(p.dob, p.deathDate),
+            ].filter(Boolean).join("\n")
 
             nodes.push({
                 id: p._id,
                 data: { label: lines },
                 position: pos,
-                // styling — contrasty colors: female hot-pink, male sea-green, other grey
                 style: {
                     border: "2px solid #333",
                     borderRadius: 10,
                     padding: 8,
                     whiteSpace: "pre-line",
-                    background: p.gender === "female" ? "#ff4da6" : p.gender === "male" ? "#2dd4bf" : "#c7d2fe",
-                    color: "#02111a",
+                    background: p.gender === "female" ? COLORS.female : p.gender === "male" ? COLORS.male : COLORS.other,
+                    color: COLORS.text,
+                    fontSize: 9,
                     fontWeight: 600,
                     minWidth: 110,
                     textAlign: "center",
@@ -211,60 +254,9 @@ export default function FamilyTree() {
             })
         })
 
-        // Build marriages + edges
-        marriages.forEach((m) => {
-            const marriageNodeId = `marriage-${m._id}`
-            const pos = nodePositions[marriageNodeId] ?? { x: 0, y: 0 }
-            const dateStr = formatPartialDate(m.date)
-            const label = [`⚭ ${dateStr || ""}`, m.place || "", m.status ? `(${m.status})` : ""].filter(Boolean).join("\n")
-
-            nodes.push({
-                id: marriageNodeId,
-                data: { label },
-                position: pos,
-                style: {
-                    minWidth: 60,
-                    minHeight: 36,
-                    borderRadius: 8,
-                    border: "2px solid rgba(0,0,0,0.7)",
-                    background: "#ffd166", // lemon/orange
-                    color: "#2b2b2b",
-                    textAlign: "center",
-                    whiteSpace: "pre-line",
-                    padding: 6,
-                    fontSize: 12,
-                    fontWeight: 700,
-                },
-            })
-
-            // edges: spouse -> marriage
-            m.spouses.forEach((sid) => {
-                edges.push({
-                    id: `${sid}-${marriageNodeId}`,
-                    source: sid,
-                    target: marriageNodeId,
-                    animated: false,
-                    style: { stroke: "#333", strokeWidth: 1.25 },
-                })
-            })
-
-            // edges: marriage -> children
-            m.children?.forEach((cid) => {
-                edges.push({
-                    id: `${marriageNodeId}-${cid}`,
-                    source: marriageNodeId,
-                    target: cid,
-                    animated: true,
-                    style: { stroke: "#333", strokeWidth: 1.25 },
-                })
-            })
-        })
-
         return { nodes, edges }
     }, [persons, marriages])
 
-
-    // Show loading state
     if (loading) {
         return (
             <div className="flex items-center justify-center h-full w-full bg-gray-50">
@@ -276,8 +268,6 @@ export default function FamilyTree() {
         )
     }
 
-
-    // Show error state
     if (error) {
         return (
             <div className="flex items-center justify-center h-full w-full bg-gray-50">
@@ -296,7 +286,6 @@ export default function FamilyTree() {
         )
     }
 
-    // render just the canvas (no minimap, no controls). fitView will scale to show the whole graph.
     return (
         <div className="w-full h-full">
             <ReactFlow nodes={nodes} edges={edges} fitView>

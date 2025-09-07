@@ -14,7 +14,8 @@ export function formatPartialDate(d?: PartialDate): string {
   
   const { year, month, day } = d;
   if (year && month && day) {
-    return `${day}/${month}/${year}${d.approximate ? ' (approx)' : ''}`;
+    const formatter = new Intl.DateTimeFormat('en-IN', { day: "2-digit", month: 'short' });
+    return `${formatter.format(new Date(year, month - 1, day))} ${year}${d.approximate ? ' (approx)' : ''}`;
   }
   if (month && year) {
     return `${month}/${year}${d.approximate ? ' (approx)' : ''}`;
@@ -97,7 +98,7 @@ export function formatLifeSpan(dob?: PartialDate, deathDate?: PartialDate): stri
     return `${birth} - ${death}`;
   }
   if (birth) {
-    return `${birth} - Present`;
+    return `${birth}`;
   }
   if (death) {
     return `? - ${death}`;
@@ -111,20 +112,6 @@ export function formatLifeSpan(dob?: PartialDate, deathDate?: PartialDate): stri
  */
 export function isValidObjectId(id: string): boolean {
   return /^[0-9a-fA-F]{24}$/.test(id);
-}
-
-/**
- * Generate a random color for gender (fallback for tree nodes)
- */
-export function getGenderColor(gender?: string): string {
-  switch (gender) {
-    case 'male':
-      return '#2dd4bf'; // teal
-    case 'female':
-      return '#f076b3'; // pink
-    default:
-      return '#c7d2fe'; // purple/gray
-  }
 }
 
 /**
