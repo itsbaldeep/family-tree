@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { randomBytes } from "node:crypto";
 
 export async function setCookie(name: string, value: string, maxAgeSeconds: number, path = "/") {
   (await cookies()).set({
@@ -30,6 +31,5 @@ export function getBaseUrl() {
 }
 
 export function randomString(bytes = 32) {
-  const { randomBytes } = require("crypto");
   return randomBytes(bytes).toString("hex");
 }

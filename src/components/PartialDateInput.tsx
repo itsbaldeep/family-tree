@@ -1,6 +1,6 @@
 "use client"
 
-import { PartialDate } from '@/data/familyTree'
+import { PartialDate } from '@/lib/models'
 import { getMonthAbbrev } from '@/lib/utils'
 import { useState } from 'react'
 

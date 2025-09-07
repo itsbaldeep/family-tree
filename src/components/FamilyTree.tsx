@@ -1,7 +1,7 @@
 "use client"
 
 import { IMarriage, IPerson } from "@/lib/models";
-import { calculateAge, COLORS, formatLifeSpan } from "@/lib/utils";
+import { COLORS } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background, Controls, Edge, Node } from "react-flow-renderer";
 import { nodeTypes } from "./Nodes";
@@ -183,10 +183,6 @@ export default function FamilyTree() {
             const isSpouse = marriages.some(m => m.spouses.includes(p._id))
             if (isSpouse) return
             const pos = nodePositions[p._id] ?? { x: 0, y: 0 }
-            const lines = [
-                `${p.name} (${calculateAge(p.dob, p.deathDate)})`,
-                formatLifeSpan(p.dob, p.deathDate),
-            ].filter(Boolean).join("\n")
 
             nodes.push({
                 id: p._id,
