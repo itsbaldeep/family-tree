@@ -3,7 +3,7 @@
 import { IMarriage, IPerson } from "@/lib/models";
 import { calculateAge, formatLifeSpan, formatPartialDate } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
-import ReactFlow, { Background, Edge, Node } from "react-flow-renderer";
+import ReactFlow, { Background, Controls, Edge, Node } from "react-flow-renderer";
 
 type Position = { x: number; y: number }
 
@@ -290,6 +290,7 @@ export default function FamilyTree() {
         <div className="w-full h-full">
             <ReactFlow nodes={nodes} edges={edges} fitView>
                 <Background />
+                <Controls />
             </ReactFlow>
         </div>
     )
