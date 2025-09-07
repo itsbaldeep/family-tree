@@ -1,20 +1,12 @@
 "use client"
 
 import { IMarriage, IPerson } from "@/lib/models";
-import { calculateAge, formatLifeSpan, formatPartialDate } from "@/lib/utils";
+import { calculateAge, COLORS, formatLifeSpan } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background, Controls, Edge, Node } from "react-flow-renderer";
+import { nodeTypes } from "./Nodes";
 
 type Position = { x: number; y: number }
-
-const COLORS = {
-    male: "#95cdf5",
-    female: "#f8a8ec",
-    other: "#c7d2fe",
-    marriage: "#f9f789",
-    text: "#222222",
-    edge: "#333333"
-}
 
 export default function FamilyTree() {
     const [persons, setPersons] = useState<IPerson[]>([])
@@ -82,12 +74,6 @@ export default function FamilyTree() {
             return new Date(p.dob.year, (p.dob.month ?? 1) - 1, p.dob.day ?? 1)
         }
 
-        // Format spouse label with gender color + birth/death
-        const formatSpouseLabel = (p: IPerson) => {
-            const lifespan = formatLifeSpan(p.dob, p.deathDate)
-            return `${p.name} (${calculateAge(p.dob, p.deathDate)})\n${lifespan}\n`
-        }
-
         function layoutMarriage(marriageId: string, depth: number, xOffset: number): { centerX: number; nextX: number } {
             if (!marriageMap[marriageId]) return { centerX: xOffset, nextX: xOffset + hSpacing }
             if (visitedMarriages.has(marriageId)) return { centerX: xOffset, nextX: xOffset + hSpacing }
@@ -139,57 +125,24 @@ export default function FamilyTree() {
             const spouseNodeId = `spouses-${m._id}`
             nodePositions[spouseNodeId] = { x: centerX, y: (depth - 1) * vSpacing }
 
-            // Decide bloodline color (pick first spouse)
-            const bloodSpouse = spouses[0]
-            const baseColor =
-                bloodSpouse?.gender === "male"
-                    ? COLORS.male
-                    : bloodSpouse?.gender === "female"
-                        ? COLORS.female
-                        : COLORS.other
-
-            const lines = spouses.map(formatSpouseLabel).join("")
-
             nodes.push({
                 id: spouseNodeId,
-                data: { label: lines },
+                type: "marriedPerson",
+                data: { spouses, marriage: m },
                 position: nodePositions[spouseNodeId],
-                style: {
-                    border: "2px solid #333",
-                    whiteSpace: "pre-line",
-                    background: baseColor,
-                    minWidth: 110,
-                    textAlign: "center",
-                    borderRadius: 10,
-                    padding: 8,
-                    fontSize: 9,
-                    color: COLORS.text,
-                    fontWeight: 600,
-                },
             })
 
             // marriage node itself
             const marriageNodeId = `marriage-${m._id}`
             nodePositions[marriageNodeId] = { x: centerX, y: depth * vSpacing + 5 }
-            const dateStr = formatPartialDate(m.date)
-            const label = [`💍 ${dateStr || ""} (${calculateAge(m.date, {})})`].filter(Boolean).join("\n")
 
             nodes.push({
                 id: marriageNodeId,
-                data: { label },
+                type: "marriage",
+                data: { marriage: m },
                 position: nodePositions[marriageNodeId],
-                style: {
-                    borderRadius: 8,
-                    border: "2px solid rgba(0,0,0,0.7)",
-                    background: COLORS.marriage,
-                    color: COLORS.text,
-                    textAlign: "center",
-                    whiteSpace: "pre-line",
-                    padding: 6,
-                    fontSize: 9,
-                    fontWeight: 600,
-                },
-            })
+            });
+
 
             // connect spouse node to marriage node
             edges.push({
@@ -237,21 +190,11 @@ export default function FamilyTree() {
 
             nodes.push({
                 id: p._id,
-                data: { label: lines },
+                type: "person", // matches nodeTypes.person
+                data: { person: p, },
                 position: pos,
-                style: {
-                    border: "2px solid #333",
-                    borderRadius: 10,
-                    padding: 8,
-                    whiteSpace: "pre-line",
-                    background: p.gender === "female" ? COLORS.female : p.gender === "male" ? COLORS.male : COLORS.other,
-                    color: COLORS.text,
-                    fontSize: 9,
-                    fontWeight: 600,
-                    minWidth: 110,
-                    textAlign: "center",
-                },
-            })
+            });
+
         })
 
         return { nodes, edges }
@@ -288,10 +231,16 @@ export default function FamilyTree() {
 
     return (
         <div className="w-full h-full">
-            <ReactFlow nodes={nodes} edges={edges} fitView>
+            <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                fitView
+                nodeTypes={nodeTypes}
+            >
                 <Background />
                 <Controls />
             </ReactFlow>
+
         </div>
     )
 }

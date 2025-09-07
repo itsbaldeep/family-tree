@@ -1,5 +1,15 @@
 import { PartialDate } from './models';
 
+export const COLORS = {
+  male: "#95cdf5",
+  female: "#f8a8ec",
+  other: "#c7d2fe",
+  marriage: "#f9f789",
+  text: "#222222",
+  edge: "#333333",
+  border: "#444444"
+}
+
 /**
  * Format partial date for display
  */
@@ -73,7 +83,16 @@ export function calculateAge(dob?: PartialDate, deathDate?: PartialDate): number
   const currentYear = new Date().getFullYear();
   const endYear = deathDate?.year || currentYear;
   
-  return endYear - dob.year;
+  const age = endYear - dob.year;
+  if (dob.month && dob.day) {
+    const now = new Date();
+    const dobDate = new Date(endYear, dob.month - 1, dob.day);
+    if (now < dobDate) {
+      return age - 1;
+    }
+  }
+  
+  return age;
 }
 
 /**
