@@ -89,7 +89,7 @@ export function MarriageNode({ data }: NodeProps<{ marriage: IMarriage }>) {
             }}
         >
             <Handle type="target" position={Position.Top} />
-            💍 {formatPartialDate(data.marriage.date)}
+            💍 {formatPartialDate(data.marriage.date)} (${calculateAge(data.marriage.date, {})})
             <Handle type="source" position={Position.Bottom} />
         </div>
     );
