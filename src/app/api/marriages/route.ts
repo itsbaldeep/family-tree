@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     
     // Verify that both spouses exist
     const spouseCount = await Person.countDocuments({
-      _id: { $in: [spouse1, spouse2] }
+      id: { $in: [spouse1, spouse2] }
     });
     
     if (spouseCount !== 2) {
@@ -113,7 +113,7 @@ export async function PUT(request: Request) {
       
       // Verify that both spouses exist
       const spouseCount = await Person.countDocuments({
-        _id: { $in: [spouse1, spouse2] }
+        id: { $in: [spouse1, spouse2] }
       });
       
       if (spouseCount !== 2) {
@@ -126,7 +126,7 @@ export async function PUT(request: Request) {
     // Validate children if provided
     if (updatedMarriageData.children && updatedMarriageData.children.length > 0) {
       const childrenCount = await Person.countDocuments({
-        _id: { $in: updatedMarriageData.children }
+        id: { $in: updatedMarriageData.children }
       });
       
       if (childrenCount !== updatedMarriageData.children.length) {

@@ -32,6 +32,8 @@ export interface Photo {
   isProfilePhoto?: boolean;
 }
 
+export type EditingPerson = Partial<IPerson> & { parentMarriageId?: string }
+
 // Enhanced Person interface with future features
 export interface IPerson {
   _id: string;

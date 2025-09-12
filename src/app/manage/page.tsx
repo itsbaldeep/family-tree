@@ -1,4 +1,4 @@
-import { ManageView } from "@/components/Manage";
+import { ManageView } from "@/components/manage";
 import { verifyAppJwt } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";

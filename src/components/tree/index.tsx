@@ -4,7 +4,7 @@ import { IMarriage, IPerson } from "@/lib/models";
 import { COLORS } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background, Controls, Edge, Node } from "react-flow-renderer";
-import { nodeTypes } from "./Nodes";
+import { nodeTypes } from "./nodes";
 
 type Position = { x: number; y: number }
 
@@ -44,18 +44,18 @@ export default function FamilyTree() {
     const { nodes, edges } = useMemo(() => {
         const nodes: Node[] = []
         const edges: Edge[] = []
-        const marriageMap = Object.fromEntries(marriages.map((m) => [m._id, m]))
+        const marriageMap = Object.fromEntries(marriages.map((m) => [m.id, m]))
 
         const spouseToMarriageIds = new Map<string, string[]>()
         marriages.forEach((m) => {
             m.spouses.forEach((s) => {
-                spouseToMarriageIds.set(s, [...(spouseToMarriageIds.get(s) ?? []), m._id])
+                spouseToMarriageIds.set(s, [...(spouseToMarriageIds.get(s) ?? []), m.id])
             })
         })
 
         // detect roots
         const marriageHasParent = new Map<string, boolean>()
-        marriages.forEach((m) => marriageHasParent.set(m._id, false))
+        marriages.forEach((m) => marriageHasParent.set(m.id, false))
         marriages.forEach((m) => {
             m.children?.forEach((childId) => {
                 // 🚫 ignore if childId is actually a spouse of this marriage
@@ -66,7 +66,7 @@ export default function FamilyTree() {
             })
 
         })
-        const rootMarriages = marriages.filter((m) => !marriageHasParent.get(m._id))
+        const rootMarriages = marriages.filter((m) => !marriageHasParent.get(m.id))
 
         const nodePositions: Record<string, Position> = {}
         const hSpacing = 160
@@ -90,8 +90,8 @@ export default function FamilyTree() {
 
             // sort children by DOB
             const sortedChildren = [...(m.children ?? [])].sort((a, b) => {
-                const pa = persons.find(p => p._id === a)
-                const pb = persons.find(p => p._id === b)
+                const pa = persons.find(p => p.id === a)
+                const pb = persons.find(p => p.id === b)
                 const da = dobToDate(pa)
                 const db = dobToDate(pb)
                 if (!da && !db) return 0
@@ -123,10 +123,10 @@ export default function FamilyTree() {
 
             // spouse merged node
             const spouses = m.spouses
-                .map(id => persons.find(p => p._id === id))
+                .map(id => persons.find(p => p.id === id))
                 .filter((p): p is IPerson => !!p)
 
-            const spouseNodeId = `spouses-${m._id}`
+            const spouseNodeId = `spouses-${m.id}`
             nodePositions[spouseNodeId] = { x: centerX, y: (depth - 1) * vSpacing }
 
             nodes.push({
@@ -137,7 +137,7 @@ export default function FamilyTree() {
             })
 
             // marriage node itself
-            const marriageNodeId = `marriage-${m._id}`
+            const marriageNodeId = `marriage-${m.id}`
             nodePositions[marriageNodeId] = { x: centerX, y: depth * vSpacing + 5 }
 
             nodes.push({
@@ -178,18 +178,18 @@ export default function FamilyTree() {
         // layout roots
         let globalX = 0
         rootMarriages.forEach((rm) => {
-            const { nextX } = layoutMarriage(rm._id, 1, globalX)
+            const { nextX } = layoutMarriage(rm.id, 1, globalX)
             globalX = nextX + hSpacing
         })
 
         // Build standalone person nodes
         persons.forEach((p) => {
-            const isSpouse = marriages.some(m => m.spouses.includes(p._id))
+            const isSpouse = marriages.some(m => m.spouses.includes(p.id))
             if (isSpouse) return
-            const pos = nodePositions[p._id] ?? { x: 0, y: 0 }
+            const pos = nodePositions[p.id] ?? { x: 0, y: 0 }
 
             nodes.push({
-                id: p._id,
+                id: p.id,
                 type: "person", // matches nodeTypes.person
                 data: { person: p, },
                 position: pos,

@@ -1,4 +1,3 @@
-
 import { IMarriage, IPerson } from "@/lib/models";
 import { calculateAge, COLORS, formatLifeSpan, formatPartialDate } from "@/lib/utils";
 import { Handle, NodeProps, Position } from "react-flow-renderer";

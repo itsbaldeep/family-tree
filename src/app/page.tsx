@@ -1,4 +1,4 @@
-import FamilyTree from "@/components/FamilyTree"
+import FamilyTree from "@/components/tree"
 
 export default function Home() {
   return (
