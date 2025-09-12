@@ -10,7 +10,7 @@ import { Fragment, useEffect, useState } from 'react'
 
 // Helper function to get person name by ID
 function getPersonName(persons: IPerson[], id: string): string {
-    const person = persons.find(p => p._id === id)
+    const person = persons.find(p => p.id === id)
     return person?.name || id
 }
 
@@ -91,7 +91,7 @@ export function ManageView() {
     const [editingMarriage, setEditingMarriage] = useState<Partial<IMarriage> | null>(null)
     const [deleteConfirm, setDeleteConfirm] = useState<{
         type: 'person' | 'marriage'
-        _id: string
+        id: string
         name: string
     } | null>(null)
 
@@ -148,7 +148,7 @@ export function ManageView() {
 
     const savePerson = async (person: Partial<IPerson>) => {
         try {
-            const isNew = !person._id
+            const isNew = !person.id
             const response = await fetch('/api/persons', {
                 method: isNew ? 'POST' : 'PUT',
                 headers: {
@@ -166,7 +166,7 @@ export function ManageView() {
             if (isNew) {
                 setPersons(prev => [...prev, savedPerson])
             } else {
-                setPersons(prev => prev.map(p => p._id === savedPerson._id ? savedPerson : p))
+                setPersons(prev => prev.map(p => p.id === savedPerson.id ? savedPerson : p))
             }
 
             setEditingPerson(null)
@@ -186,7 +186,7 @@ export function ManageView() {
                 throw new Error('Failed to delete person')
             }
 
-            setPersons(prev => prev.filter(p => p._id !== id))
+            setPersons(prev => prev.filter(p => p.id !== id))
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Failed to delete person')
         }
@@ -211,7 +211,7 @@ export function ManageView() {
                 return
             }
 
-            const isNew = !marriage._id
+            const isNew = !marriage.id
             const response = await fetch('/api/marriages', {
                 method: isNew ? 'POST' : 'PUT',
                 headers: {
@@ -229,7 +229,7 @@ export function ManageView() {
             if (isNew) {
                 setMarriages(prev => [...prev, savedMarriage])
             } else {
-                setMarriages(prev => prev.map(m => m._id === savedMarriage._id ? savedMarriage : m))
+                setMarriages(prev => prev.map(m => m.id === savedMarriage.id ? savedMarriage : m))
             }
 
             setEditingMarriage(null)
@@ -249,7 +249,7 @@ export function ManageView() {
                 throw new Error('Failed to delete marriage')
             }
 
-            setMarriages(prev => prev.filter(m => m._id !== id))
+            setMarriages(prev => prev.filter(m => m.id !== id))
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Failed to delete marriage')
         }
@@ -381,7 +381,7 @@ export function ManageView() {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {paginatedPersons.map((person) => (
-                                        <tr key={person._id} className="hover:bg-gray-50">
+                                        <tr key={person.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div>
                                                     <div className="text-sm font-medium text-gray-900">{person.name}</div>
@@ -416,7 +416,7 @@ export function ManageView() {
                                                 <button
                                                     onClick={() => setDeleteConfirm({
                                                         type: 'person',
-                                                        _id: person._id,
+                                                        id: person.id,
                                                         name: person.name
                                                     })}
                                                     className="text-red-600 hover:text-red-900"
@@ -504,7 +504,7 @@ export function ManageView() {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {paginatedMarriages.map((marriage) => (
-                                        <tr key={marriage._id} className="hover:bg-gray-50">
+                                        <tr key={marriage.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4">
                                                 <div className="text-sm font-medium text-gray-900">
                                                     {getPersonName(persons, marriage.spouses[0])} & {getPersonName(persons, marriage.spouses[1])}
@@ -548,7 +548,7 @@ export function ManageView() {
                                                 <button
                                                     onClick={() => setDeleteConfirm({
                                                         type: 'marriage',
-                                                        _id: marriage._id,
+                                                        id: marriage.id,
                                                         name: `${getPersonName(persons, marriage.spouses[0])} & ${getPersonName(persons, marriage.spouses[1])}`
                                                     })}
                                                     className="text-red-600 hover:text-red-900"
@@ -623,7 +623,7 @@ export function ManageView() {
                             >
                                 <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
                                     <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 mb-6">
-                                        {editingPerson?._id ? 'Edit Person' : 'Add Person'}
+                                        {editingPerson?.id ? 'Edit Person' : 'Add Person'}
                                     </Dialog.Title>
 
                                     {editingPerson && (
@@ -730,7 +730,7 @@ export function ManageView() {
                                             onClick={() => editingPerson && savePerson(editingPerson)}
                                             className="px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 rounded-md transition-colors"
                                         >
-                                            {editingPerson?._id ? 'Update' : 'Add'} Person
+                                            {editingPerson?.id ? 'Update' : 'Add'} Person
                                         </button>
                                     </div>
                                 </Dialog.Panel>
@@ -768,7 +768,7 @@ export function ManageView() {
                             >
                                 <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
                                     <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 mb-6">
-                                        {editingMarriage?._id ? 'Edit Marriage' : 'Add Marriage'}
+                                        {editingMarriage?.id ? 'Edit Marriage' : 'Add Marriage'}
                                     </Dialog.Title>
 
                                     {editingMarriage && editingMarriage.spouses && (
@@ -789,8 +789,8 @@ export function ManageView() {
                                                     >
                                                         <option value="">Select person</option>
                                                         {persons.map(person => (
-                                                            <option key={person._id} value={person._id}>
-                                                                {person.name} ({person._id})
+                                                            <option key={person.id} value={person.id}>
+                                                                {person.name} ({person.id})
                                                             </option>
                                                         ))}
                                                     </select>
@@ -809,8 +809,8 @@ export function ManageView() {
                                                     >
                                                         <option value="">Select person</option>
                                                         {persons.map(person => (
-                                                            <option key={person._id} value={person._id}>
-                                                                {person.name} ({person._id})
+                                                            <option key={person.id} value={person.id}>
+                                                                {person.name} ({person.id})
                                                             </option>
                                                         ))}
                                                     </select>
@@ -869,10 +869,10 @@ export function ManageView() {
                                                             Select children from existing persons:
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-                                                            {persons.map(person => {
-                                                                const isSelected = editingMarriage.children?.includes(person._id) || false
+                                                            {persons.filter(p => !editingMarriage.spouses?.some(sp => sp === p.id)).map(person => {
+                                                                const isSelected = editingMarriage.children?.includes(person.id) || false
                                                                 return (
-                                                                    <label key={person._id} className="flex items-center gap-2 text-sm">
+                                                                    <label key={person.id} className="flex items-center gap-2 text-sm">
                                                                         <input
                                                                             type="checkbox"
                                                                             checked={isSelected}
@@ -881,18 +881,18 @@ export function ManageView() {
                                                                                 if (e.target.checked) {
                                                                                     setEditingMarriage({
                                                                                         ...editingMarriage,
-                                                                                        children: [...currentChildren, person._id]
+                                                                                        children: [...currentChildren, person.id]
                                                                                     })
                                                                                 } else {
                                                                                     setEditingMarriage({
                                                                                         ...editingMarriage,
-                                                                                        children: currentChildren.filter(id => id !== person._id)
+                                                                                        children: currentChildren.filter(id => id !== person.id)
                                                                                     })
                                                                                 }
                                                                             }}
                                                                             className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                                                                         />
-                                                                        <span>{person.name} ({person._id})</span>
+                                                                        <span>{person.name} ({person.id})</span>
                                                                     </label>
                                                                 )
                                                             })}
@@ -933,7 +933,7 @@ export function ManageView() {
                                             onClick={() => editingMarriage && saveMarriage(editingMarriage)}
                                             className="px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 rounded-md transition-colors"
                                         >
-                                            {editingMarriage?._id ? 'Update' : 'Add'} Marriage
+                                            {editingMarriage?.id ? 'Update' : 'Add'} Marriage
                                         </button>
                                     </div>
                                 </Dialog.Panel>
@@ -950,9 +950,9 @@ export function ManageView() {
                     onClose={() => setDeleteConfirm(null)}
                     onConfirm={() => {
                         if (deleteConfirm.type === 'person') {
-                            deletePerson(deleteConfirm._id)
+                            deletePerson(deleteConfirm.id)
                         } else {
-                            deleteMarriage(deleteConfirm._id)
+                            deleteMarriage(deleteConfirm.id)
                         }
                     }}
                     title={`Delete ${deleteConfirm.type}`}

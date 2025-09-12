@@ -35,6 +35,7 @@ export interface Photo {
 // Enhanced Person interface with future features
 export interface IPerson {
   _id: string;
+  id: string;
   name: string;
   gender?: 'male' | 'female' | 'other';
   dob?: PartialDate;
@@ -56,6 +57,7 @@ export interface IPerson {
 // Enhanced Marriage interface with future features
 export interface IMarriage {
   _id: string;
+  id: string;
   spouses: [string, string]; // Person IDs
   date?: PartialDate;
   place?: string;
