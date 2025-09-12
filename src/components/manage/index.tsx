@@ -12,9 +12,19 @@ import { PersonModal } from './person-modal'
 // Helper function to get person name by ID
 function getPersonName(persons: IPerson[], id: string): string {
     const person = persons.find(p => p.id === id)
-    return person?.name || id
+    if (!person) {
+        return id
+    }
+    return person.name
 }
 
+function getPersonId(persons: IPerson[], id: string): string {
+    const person = persons.find(p => p.id === id)
+    if (!person) {
+        return ""
+    }
+    return person.id
+}
 
 export function ManageView() {
     const [persons, setPersons] = useState<IPerson[]>([])
@@ -364,7 +374,7 @@ export function ManageView() {
                                         <tr key={person.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div>
-                                                    <div className="text-sm font-medium text-gray-900">{person.name}</div>
+                                                    <div className="text-sm font-medium text-gray-900">{person.name} <span className='text-xs font-normal text-gray-500'>({person.id})</span></div>
                                                     <div className="text-sm text-gray-500">{person.birthPlace}</div>
                                                 </div>
                                             </td>
@@ -377,7 +387,7 @@ export function ManageView() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {formatPartialDate(person.dob)}
+                                                {person.dob ? formatPartialDate(person.dob) : '—'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {person.deathDate ? formatPartialDate(person.deathDate) : '—'}
@@ -486,8 +496,10 @@ export function ManageView() {
                                     {paginatedMarriages.map((marriage) => (
                                         <tr key={marriage.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {getPersonName(persons, marriage.spouses[0])} & {getPersonName(persons, marriage.spouses[1])}
+                                                <div className="text-sm font-normal text-gray-900">
+                                                    {getPersonName(persons, marriage.spouses[0])} <span className="text-xs text-gray-500">({getPersonId(persons, marriage.spouses[0])})</span>
+                                                    <br />
+                                                    {getPersonName(persons, marriage.spouses[1])} <span className="text-xs text-gray-500">({getPersonId(persons, marriage.spouses[1])})</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -510,7 +522,7 @@ export function ManageView() {
                                                     <div className="space-y-1">
                                                         {marriage.children.map(childId => (
                                                             <div key={childId} className="text-xs">
-                                                                {getPersonName(persons, childId)}
+                                                                {getPersonName(persons, childId)} <span className="text-gray-500">({getPersonId(persons, childId)})</span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -593,21 +605,23 @@ export function ManageView() {
             />
 
             {/* Delete Confirmation Modal */}
-            {deleteConfirm && (
-                <DeleteConfirmModal
-                    isOpen={!!deleteConfirm}
-                    onClose={() => setDeleteConfirm(null)}
-                    onConfirm={() => {
-                        if (deleteConfirm.type === 'person') {
-                            deletePerson(deleteConfirm.id)
-                        } else {
-                            deleteMarriage(deleteConfirm.id)
-                        }
-                    }}
-                    title={`Delete ${deleteConfirm.type}`}
-                    message={`Are you sure you want to delete "${deleteConfirm.name}"? This action cannot be undone.`}
-                />
-            )}
-        </div>
+            {
+                deleteConfirm && (
+                    <DeleteConfirmModal
+                        isOpen={!!deleteConfirm}
+                        onClose={() => setDeleteConfirm(null)}
+                        onConfirm={() => {
+                            if (deleteConfirm.type === 'person') {
+                                deletePerson(deleteConfirm.id)
+                            } else {
+                                deleteMarriage(deleteConfirm.id)
+                            }
+                        }}
+                        title={`Delete ${deleteConfirm.type}`}
+                        message={`Are you sure you want to delete "${deleteConfirm.name}"? This action cannot be undone.`}
+                    />
+                )
+            }
+        </div >
     )
 }
