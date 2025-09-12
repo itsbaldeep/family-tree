@@ -58,9 +58,13 @@ export default function FamilyTree() {
         marriages.forEach((m) => marriageHasParent.set(m._id, false))
         marriages.forEach((m) => {
             m.children?.forEach((childId) => {
+                // 🚫 ignore if childId is actually a spouse of this marriage
+                if (m.spouses.includes(childId)) return
+
                 const childMarriageIds = spouseToMarriageIds.get(childId) ?? []
                 childMarriageIds.forEach((mid) => marriageHasParent.set(mid, true))
             })
+
         })
         const rootMarriages = marriages.filter((m) => !marriageHasParent.get(m._id))
 
