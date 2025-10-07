@@ -34,6 +34,19 @@ export interface Photo {
 
 export type EditingPerson = Partial<IPerson> & { parentMarriageId?: string }
 
+// Counter schema for auto-incrementing IDs
+interface ICounter {
+  _id: string;
+  sequence: number;
+}
+
+const CounterSchema = new Schema<ICounter>({
+  _id: { type: String, required: true },
+  sequence: { type: Number, required: true, default: 0 }
+});
+
+const Counter = mongoose.models.Counter || mongoose.model<ICounter>('Counter', CounterSchema);
+
 // Enhanced Person interface with future features
 export interface IPerson {
   _id: string;
@@ -112,6 +125,13 @@ const PhotoSchema = new Schema<Photo>({
 
 // Person Schema with enhanced features
 const PersonSchema = new Schema<IPerson>({
+  id: {
+    type: String,
+    required: true,
+    unique: true,
+    match: /^p\d+$/,
+    immutable: true // Prevent changes to ID after creation
+  },
   name: { 
     type: String, 
     required: true, 
@@ -173,7 +193,7 @@ const PersonSchema = new Schema<IPerson>({
   toJSON: { 
     virtuals: true,
     transform: function(doc, ret: Record<string, unknown>) {
-      ret.id = ret._id;
+      // Keep the existing id field (p1020, etc.), don't overwrite with _id
       delete ret._id;
       delete ret.__v;
       return ret;
@@ -183,6 +203,13 @@ const PersonSchema = new Schema<IPerson>({
 
 // Marriage Schema with enhanced features
 const MarriageSchema = new Schema<IMarriage>({
+  id: {
+    type: String,
+    required: true,
+    unique: true,
+    match: /^m\d+$/,
+    immutable: true // Prevent changes to ID after creation
+  },
   spouses: {
     type: [String],
     required: true,
@@ -230,7 +257,7 @@ const MarriageSchema = new Schema<IMarriage>({
   toJSON: { 
     virtuals: true,
     transform: function(doc, ret: Record<string, unknown>) {
-      ret.id = ret._id;
+      // Keep the existing id field (m1020, etc.), don't overwrite with _id
       delete ret._id;
       delete ret.__v;
       return ret;
@@ -254,13 +281,42 @@ MarriageSchema.index({ place: 1 });
 MarriageSchema.index({ status: 1 });
 MarriageSchema.index({ createdAt: -1 });
 
-// Pre-save middleware to update isLiving based on deathDate
-PersonSchema.pre('save', function(next) {
+// Function to get next sequence number
+async function getNextSequence(name: string): Promise<number> {
+  const result = await Counter.findByIdAndUpdate(
+    name,
+    { $inc: { sequence: 1 } },
+    { new: true, upsert: true }
+  );
+  return result.sequence;
+}
+
+// Pre-save middleware to auto-generate ID and update isLiving
+PersonSchema.pre('validate', async function(next) {
+  // Auto-generate ID if not provided
+  if (!this.id) {
+    const sequence = await getNextSequence('person');
+    this.id = `p${sequence}`;
+  }
+  
+  // Update isLiving based on deathDate
   if (this.deathDate && (this.deathDate.year || this.deathDate.range)) {
     this.isLiving = false;
   } else {
     this.isLiving = true;
   }
+  
+  next();
+});
+
+// Pre-save middleware to auto-generate ID for marriages
+MarriageSchema.pre('validate', async function(next) {
+  // Auto-generate ID if not provided
+  if (!this.id) {
+    const sequence = await getNextSequence('marriage');
+    this.id = `m${sequence}`;
+  }
+  
   next();
 });
 
@@ -288,5 +344,5 @@ MarriageSchema.virtual('duration').get(function() {
 const Person = mongoose.models.Person || mongoose.model<IPerson>('Person', PersonSchema);
 const Marriage = mongoose.models.Marriage || mongoose.model<IMarriage>('Marriage', MarriageSchema);
 
-export { Marriage, Person };
+export { Counter, Marriage, Person };
 

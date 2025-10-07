@@ -7,6 +7,7 @@ const FONTSIZE = 9;
 const BORDERWIDTH = 2;
 
 export function PersonNode({ data }: NodeProps<{ person: IPerson }>) {
+    const age = calculateAge(data.person.dob, data.person.deathDate);
     return (
         <div
             style={{
@@ -24,7 +25,7 @@ export function PersonNode({ data }: NodeProps<{ person: IPerson }>) {
         >
             <Handle type="target" position={Position.Top} />
 
-            <p>{data.person.name} ({calculateAge(data.person.dob, data.person.deathDate)})</p>
+            <p>{data.person.name} {age ? `(${age})` : ''}</p>
             <p>{formatLifeSpan(data.person.dob, data.person.deathDate)}</p>
 
             <Handle type="source" position={Position.Bottom} />
@@ -43,6 +44,9 @@ export function MarriedPersonNode({ data }: NodeProps<{ spouses: IPerson[], marr
                 ? COLORS.female
                 : COLORS.other
 
+    const bloodSpouseAge = calculateAge(bloodSpouse.dob, bloodSpouse.deathDate);
+    const otherSpouseAge = calculateAge(otherSpouse.dob, otherSpouse.deathDate);
+
     return (
         <div
             style={{
@@ -53,16 +57,16 @@ export function MarriedPersonNode({ data }: NodeProps<{ spouses: IPerson[], marr
                 textAlign: "center",
                 borderRadius: 10,
                 padding: 8,
-                fontSize: FONTSIZE,
+                fontSize: FONTSIZE - 1,
                 color: COLORS.text,
                 fontWeight: 600,
             }}
         >
             <Handle type="target" position={Position.Top} />
 
-            <p>{bloodSpouse.name} ({calculateAge(bloodSpouse.dob, bloodSpouse.deathDate)})</p>
+            <p>{bloodSpouse.name} {bloodSpouseAge ? `(${bloodSpouseAge})` : ''}</p>
             <p>{formatLifeSpan(bloodSpouse.dob, bloodSpouse.deathDate)}</p>
-            <p>{otherSpouse.name} ({calculateAge(otherSpouse.dob, otherSpouse.deathDate)})</p>
+            <p>{otherSpouse.name} {otherSpouseAge ? `(${otherSpouseAge})` : ''}</p>
             <p>{formatLifeSpan(otherSpouse.dob, otherSpouse.deathDate)}</p>
 
             <Handle type="source" position={Position.Bottom} />
@@ -72,6 +76,7 @@ export function MarriedPersonNode({ data }: NodeProps<{ spouses: IPerson[], marr
 
 
 export function MarriageNode({ data }: NodeProps<{ marriage: IMarriage }>) {
+    const age = calculateAge(data.marriage.date, {})
     return (
         <div
             style={{
@@ -88,7 +93,7 @@ export function MarriageNode({ data }: NodeProps<{ marriage: IMarriage }>) {
             }}
         >
             <Handle type="target" position={Position.Top} />
-            💍 {formatPartialDate(data.marriage.date)} ({calculateAge(data.marriage.date, {})})
+            💍 {formatPartialDate(data.marriage.date)} {age ? `(${age})` : ''}
             <Handle type="source" position={Position.Bottom} />
         </div>
     );

@@ -44,8 +44,8 @@ export function formatCompactDate(d?: PartialDate): string {
   if (!d) return '';
   
   if (d.range?.from || d.range?.to) {
-    const from = d.range?.from ?? '?';
-    const to = d.range?.to ?? '?';
+    const from = d.range?.from || '?';
+    const to = d.range?.to || '?';
     return `${from}–${to}`;
   }
   
@@ -77,22 +77,23 @@ export function getMonthAbbrev(month: number): string {
 /**
  * Calculate age from birth date
  */
-export function calculateAge(dob?: PartialDate, deathDate?: PartialDate): number | null {
-  if (!dob?.year) return null;
+export function calculateAge(dob?: PartialDate, deathDate?: PartialDate): string {
+  if (!dob?.year) return '';
   
   const currentYear = new Date().getFullYear();
   const endYear = deathDate?.year || currentYear;
   
-  const age = endYear - dob.year;
+  let age = endYear - dob.year;
+
   if (dob.month && dob.day) {
     const now = new Date();
     const dobDate = new Date(endYear, dob.month - 1, dob.day);
     if (now < dobDate) {
-      return age - 1;
+      age = age - 1
     }
   }
   
-  return age;
+  return `${age}${deathDate ? '' : '+'}`;
 }
 
 /**
@@ -117,7 +118,7 @@ export function formatLifeSpan(dob?: PartialDate, deathDate?: PartialDate): stri
     return `${birth} - ${death}`;
   }
   if (birth) {
-    return `${birth}`;
+    return `${birth}${dob?.range ? ' (b)' : ''}`;
   }
   if (death) {
     return `? - ${death}`;

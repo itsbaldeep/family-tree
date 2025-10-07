@@ -4,7 +4,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-This is a Next.js 15.5.2 family tree visualization application built with TypeScript, React, and Tailwind CSS. The app displays family relationships using React Flow Renderer with interactive expandable node-based diagrams, and includes a comprehensive management interface for full CRUD operations on family data with MongoDB persistence.
+This is a Next.js 15.5.2 family tree visualization application built with TypeScript, React, and Tailwind CSS. The app displays family relationships using React Flow Renderer with interactive node-based diagrams, and includes a comprehensive management interface for full CRUD operations on family data with MongoDB persistence.
+
+**📚 Complete Documentation**: See `DOCUMENTATION.md` for comprehensive technical documentation covering all aspects of the codebase including architecture, database schema, API endpoints, authentication system, frontend components, deployment configuration, and troubleshooting guides.
 
 ## Development Commands
 
